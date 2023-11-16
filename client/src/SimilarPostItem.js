@@ -31,7 +31,7 @@ export default function SimilarPostItem({
                 width: "auto",
                 height: "auto",
               }}
-              src={"http://localhost:4000/" + cover}
+              src={"https://test-rzr2.vercel.app/" + cover}
               alt=""
             />
           </Link>

@@ -16,7 +16,7 @@ export default function PostPage() {
   const [redirect, setRedirect] = useState(false);
   const { id } = useParams();
   useEffect(() => {
-    fetch(`http://localhost:4000/post/${id}`).then((response) => {
+    fetch(`https://test-rzr2.vercel.app/post/${id}`).then((response) => {
       response.json().then((postInfo) => {
         setPostInfo(postInfo);
       });
@@ -26,7 +26,7 @@ export default function PostPage() {
   if (!postInfo) return "";
   console.log("outputid", id);
   async function deletePost() {
-    const response = await fetch("http://localhost:4000/post/" + id, {
+    const response = await fetch("https://test-rzr2.vercel.app/post/" + id, {
       method: "DELETE",
       credentials: "include",
     });
@@ -78,7 +78,7 @@ export default function PostPage() {
           </div>
         )}
         <div className="image">
-          <img src={`http://localhost:4000/${postInfo.cover}`} alt="" />
+          <img src={`https://test-rzr2.vercel.app/${postInfo.cover}`} alt="" />
         </div>
         <div
           className="content"
@@ -143,7 +143,7 @@ export default function PostPage() {
               >
                 <img
                   className="postImagePhoto"
-                  src={`http://localhost:4000/${postInfo.cover}`}
+                  src={`https://test-rzr2.vercel.app/${postInfo.cover}`}
                   alt=""
                 />
               </div>
