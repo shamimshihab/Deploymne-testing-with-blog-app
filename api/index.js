@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const User = require("./models/User");
 const Post = require("./models/Post");
 const AboutMe = require("./models/AboutMe");
-const bcrypt = require("bcryptjs");
+const argon2 = require("argon2"); // Replacing bcrypt with argon2
 const app = express();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
@@ -12,7 +12,6 @@ const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
 
-const salt = bcrypt.genSaltSync(10);
 const secret = "asdfe45we45w345wegw345werjktjwertkj";
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
@@ -27,9 +26,10 @@ mongoose.connect(
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
+    const hashedPassword = await argon2.hash(password); // Hashing the password using argon2
     const userDoc = await User.create({
       username,
-      password: bcrypt.hashSync(password, salt),
+      password: hashedPassword,
     });
     res.json(userDoc);
   } catch (e) {
@@ -41,17 +41,24 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const userDoc = await User.findOne({ username });
-  const passOk = bcrypt.compareSync(password, userDoc.password);
-  if (passOk) {
-    jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
-      if (err) throw err;
-      res.cookie("token", token).json({
-        id: userDoc._id,
-        username,
+  if (!userDoc) {
+    return res.status(400).json("User not found");
+  }
+  try {
+    const passOk = await argon2.verify(userDoc.password, password);
+    if (passOk) {
+      jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
+        if (err) throw err;
+        res.cookie("token", token).json({
+          id: userDoc._id,
+          username,
+        });
       });
-    });
-  } else {
-    res.status(400).json("wrong credentials");
+    } else {
+      res.status(400).json("Wrong credentials");
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
