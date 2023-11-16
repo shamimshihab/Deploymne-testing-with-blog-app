@@ -9,7 +9,7 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
-const uploadMiddleware = multer({ dest: "uploads/" });
+// const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
 
 const secret = "asdfe45we45w345wegw345werjktjwertkj";
