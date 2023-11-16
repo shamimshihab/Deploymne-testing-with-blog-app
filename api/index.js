@@ -74,31 +74,31 @@ app.post("/logout", (req, res) => {
   res.cookie("token", "").json("ok");
 });
 
-app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
-  let cover = "";
+// app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
+//   let cover = "";
 
-  if (req.file) {
-    const { originalname, path } = req.file;
-    const parts = originalname.split(".");
-    const ext = parts[parts.length - 1];
-    const newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
-    cover = newPath;
-  }
+//   if (req.file) {
+//     const { originalname, path } = req.file;
+//     const parts = originalname.split(".");
+//     const ext = parts[parts.length - 1];
+//     const newPath = path + "." + ext;
+//     fs.renameSync(path, newPath);
+//     cover = newPath;
+//   }
 
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const { title, content } = req.body;
-    const postDoc = await Post.create({
-      title,
-      content,
-      cover,
-      author: info.id,
-    });
-    res.json(postDoc);
-  });
-});
+//   const { token } = req.cookies;
+//   jwt.verify(token, secret, {}, async (err, info) => {
+//     if (err) throw err;
+//     const { title, content } = req.body;
+//     const postDoc = await Post.create({
+//       title,
+//       content,
+//       cover,
+//       author: info.id,
+//     });
+//     res.json(postDoc);
+//   });
+// });
 app.get("/aboutMe", async (req, res) => {
   try {
     const aboutMe = await AboutMe.findOne();
