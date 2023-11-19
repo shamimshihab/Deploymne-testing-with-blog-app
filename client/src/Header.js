@@ -17,7 +17,7 @@ export default function Header({ toggleTheme }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    fetch("https://test-rzr2.vercel.app/profile", {
+    fetch("/profile", {
       credentials: "include",
     }).then((response) => {
       response.json().then((userInfo) => {
