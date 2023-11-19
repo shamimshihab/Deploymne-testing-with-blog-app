@@ -5,7 +5,7 @@ import { Typography, Paper, Button, Box } from "@mui/material";
 export default function IndexPage() {
   const [posts, setPosts] = useState([]);
   useEffect(() => {
-    fetch("https://test-rzr2.vercel.app/post").then((response) => {
+    fetch("http://localhost:4000/post").then((response) => {
       response.json().then((posts) => {
         setPosts(posts);
       });

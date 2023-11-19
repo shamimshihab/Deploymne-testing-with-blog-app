@@ -35,7 +35,10 @@ const Footer = () => {
       <Grid
         container
         className="footer-container"
-
+        // style={{
+        //   display: "flex",
+        //   alignItems: "center",
+        //   justifyContent: "space-between",
         // }}
       >
         <Grid item xs={12} md={6} className="footeer-first-container">

@@ -28,7 +28,7 @@ export default function Post({
             <Link to={`/post/${_id}`}>
               <img
                 className="index-Image"
-                src={"https://test-rzr2.vercel.app/" + cover}
+                src={"http://localhost:4000/" + cover}
                 alt=""
               />
             </Link>
