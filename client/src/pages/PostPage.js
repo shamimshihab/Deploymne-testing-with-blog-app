@@ -16,20 +16,25 @@ export default function PostPage() {
   const [redirect, setRedirect] = useState(false);
   const { id } = useParams();
   useEffect(() => {
-    fetch(`http://localhost:4000/post/${id}`).then((response) => {
-      response.json().then((postInfo) => {
-        setPostInfo(postInfo);
-      });
-    });
+    fetch(`https://mern-crud-blog-app.onrender.com/post/${id}`).then(
+      (response) => {
+        response.json().then((postInfo) => {
+          setPostInfo(postInfo);
+        });
+      }
+    );
   }, [id]);
 
   if (!postInfo) return "";
   console.log("outputid", id);
   async function deletePost() {
-    const response = await fetch("http://localhost:4000/post/" + id, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    const response = await fetch(
+      "https://mern-crud-blog-app.onrender.com/post/" + id,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
 
     if (response.ok) {
       setRedirect(true);
@@ -143,7 +148,7 @@ export default function PostPage() {
               >
                 <img
                   className="postImagePhoto"
-                  src={`http://localhost:4000/${postInfo.cover}`}
+                  src={`https://mern-crud-blog-app.onrender.com/${postInfo.cover}`}
                   alt=""
                 />
               </div>

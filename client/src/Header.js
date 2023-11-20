@@ -17,7 +17,7 @@ export default function Header({ toggleTheme }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:4000/profile", {
+    fetch("https://mern-crud-blog-app.onrender.com/profile", {
       credentials: "include",
     }).then((response) => {
       response.json().then((userInfo) => {
@@ -27,7 +27,7 @@ export default function Header({ toggleTheme }) {
   }, []);
 
   function logout() {
-    fetch("http://localhost:4000/logout", {
+    fetch("https://mern-crud-blog-app.onrender.com/logout", {
       credentials: "include",
       method: "POST",
     });

@@ -15,7 +15,17 @@ const fs = require("fs");
 const salt = bcrypt.genSaltSync(10);
 const secret = "asdfe45we45w345wegw345werjktjwertkj";
 
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+// app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(
+  cors({
+    credentials: true,
+    origin: [
+      "http://localhost:3000",
+      "https://mern-crud-blog-app.onrender.com",
+    ],
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static(__dirname + "/uploads"));
@@ -196,6 +206,18 @@ app.get("/post", async (req, res) => {
   );
 });
 
+// app.get("/aboutMe", async (req, res) => {
+//   try {
+//     const aboutMe = await AboutMe.findOne();
+//     if (aboutMe) {
+//       res.json({ description: aboutMe.description });
+//     } else {
+//       res.status(404).json({ error: "AboutMe information not found" });
+//     }
+//   } catch (err) {
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 app.get("/aboutMe", async (req, res) => {
   try {
     const aboutMe = await AboutMe.findOne();
@@ -205,7 +227,8 @@ app.get("/aboutMe", async (req, res) => {
       res.status(404).json({ error: "AboutMe information not found" });
     }
   } catch (err) {
-    res.status(500).json({ error: "Internal server error" });
+    console.error(err);
+    res.status(500).json({ error: "Failed to retrieve AboutMe information" });
   }
 });
 
@@ -215,4 +238,8 @@ app.get("/post/:id", async (req, res) => {
   res.json(postDoc);
 });
 
-app.listen(4000);
+// app.listen(4000);
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

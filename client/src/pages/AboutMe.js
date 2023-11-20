@@ -27,7 +27,9 @@ export default function AboutMe() {
   const [myDescription, setDescription] = useState("");
 
   async function fetchMyDescription() {
-    const response = await fetch("http://localhost:4000/aboutMe");
+    const response = await fetch(
+      "https://mern-crud-blog-app.onrender.com/aboutMe"
+    );
 
     if (response.ok) {
       response.json().then((userInfo) => {
