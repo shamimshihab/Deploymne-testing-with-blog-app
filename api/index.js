@@ -14,15 +14,23 @@ const fs = require("fs");
 
 const salt = bcrypt.genSaltSync(10);
 const secret = "asdfe45we45w345wegw345werjktjwertkj";
+mongoose.set("strictQuery", false);
 
 // app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+// app.use(
+//   cors({
+//     credentials: true,
+//     origin: [
+//       "http://localhost:3000",
+//       "https://mern-crud-blog-app.onrender.com",
+//     ],
+//   })
+// );
+
 app.use(
   cors({
     credentials: true,
-    origin: [
-      "http://localhost:3000",
-      "https://mern-crud-blog-app.onrender.com",
-    ],
+    origin: "*",
   })
 );
 
@@ -36,6 +44,9 @@ mongoose.connect(
 
 app.get("/", (req, res) => {
   res.send("Hello from the server!");
+});
+app.get("/check", (req, res) => {
+  res.send("check is working");
 });
 
 app.post("/register", async (req, res) => {
