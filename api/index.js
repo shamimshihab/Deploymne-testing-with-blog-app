@@ -250,7 +250,7 @@ app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
         title,
         summary,
         content,
-        cover: newPath,
+        cover: newPath.replace("\\", "/"), // Adjust the path format for Windows
         author: info.id,
       });
 
@@ -271,7 +271,7 @@ app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
     let newPath = null;
 
     if (file) {
-      newPath = file.path;
+      newPath = file.path.replace("\\", "/"); // Adjust the path format for Windows
     }
 
     const { token } = req.cookies;
