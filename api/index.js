@@ -236,7 +236,7 @@ app.get("/post", async (req, res) => {
 
 app.get("/aboutMe", async (req, res) => {
   try {
-    const aboutMe = await AboutMe.findOne();
+    const aboutMe = await AboutMe.findOne().maxTimeMS(30000);
     if (aboutMe) {
       res.json({ description: aboutMe.description });
     } else {

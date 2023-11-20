@@ -28,7 +28,7 @@ export default function AboutMe() {
 
   async function fetchMyDescription() {
     const response = await fetch(
-      "https://mern-crud-blog-app.onrender.com/aboutMe"
+      "https://react-blog-test-5r9p.onrender.com/aboutMe"
     );
 
     if (response.ok) {
