@@ -40,7 +40,7 @@ export default function CreatePost() {
     data.set("file", files[0]);
     ev.preventDefault();
     const response = await fetch(
-      "https://mern-crud-blog-app.onrender.com/post",
+      "https://react-blog-test-5r9p.onrender.com/post",
       {
         method: "POST",
         body: data,

@@ -32,7 +32,7 @@ export default function EditPost() {
   const [redirect, setRedirect] = useState(false);
 
   useEffect(() => {
-    fetch("https://mern-crud-blog-app.onrender.com/post/" + id).then(
+    fetch("https://react-blog-test-5r9p.onrender.com/post/" + id).then(
       (response) => {
         response.json().then((postInfo) => {
           setTitle(postInfo.title);
@@ -54,7 +54,7 @@ export default function EditPost() {
       data.set("file", files?.[0]);
     }
     const response = await fetch(
-      "https://mern-crud-blog-app.onrender.com/post",
+      "https://react-blog-test-5r9p.onrender.com/post",
       {
         method: "PUT",
         body: data,

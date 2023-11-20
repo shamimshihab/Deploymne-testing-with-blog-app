@@ -29,7 +29,7 @@ export default function RegisterPage() {
 
     if (password === confirmPassword) {
       const response = await fetch(
-        "https://mern-crud-blog-app.onrender.com/register",
+        "https://react-blog-test-5r9p.onrender.com/register",
         {
           method: "POST",
           body: JSON.stringify({ username, password }),

@@ -16,23 +16,23 @@ const salt = bcrypt.genSaltSync(10);
 const secret = "asdfe45we45w345wegw345werjktjwertkj";
 mongoose.set("strictQuery", false);
 
-// app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 // app.use(
 //   cors({
 //     credentials: true,
 //     origin: [
 //       "http://localhost:3000",
-//       "https://mern-crud-blog-app.onrender.com",
+//       "https://react-blog-test-5r9p.onrender.com",
 //     ],
 //   })
 // );
 
-app.use(
-  cors({
-    credentials: true,
-    origin: "*",
-  })
-);
+// app.use(
+//   cors({
+//     credentials: true,
+//     origin: "*",
+//   })
+// );
 
 app.use(express.json());
 app.use(cookieParser());

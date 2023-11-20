@@ -6,7 +6,7 @@ export default function SimilarPost() {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    fetch("https://mern-crud-blog-app.onrender.com/post").then((response) => {
+    fetch("https://react-blog-test-5r9p.onrender.com/post").then((response) => {
       response.json().then((posts) => {
         setPosts(posts);
       });

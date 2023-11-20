@@ -28,7 +28,7 @@ export default function Post({
             <Link to={`/post/${_id}`}>
               <img
                 className="index-Image"
-                src={"https://mern-crud-blog-app.onrender.com/" + cover}
+                src={"https://react-blog-test-5r9p.onrender.com/" + cover}
                 alt=""
               />
             </Link>

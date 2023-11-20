@@ -31,7 +31,7 @@ export default function SimilarPostItem({
                 width: "auto",
                 height: "auto",
               }}
-              src={"https://mern-crud-blog-app.onrender.com/" + cover}
+              src={"https://react-blog-test-5r9p.onrender.com/" + cover}
               alt=""
             />
           </Link>

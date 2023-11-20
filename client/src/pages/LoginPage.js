@@ -33,7 +33,7 @@ export default function LoginPage() {
   async function login(ev) {
     ev.preventDefault();
     const response = await fetch(
-      "https://mern-crud-blog-app.onrender.com/login",
+      "https://react-blog-test-5r9p.onrender.com/login",
       {
         method: "POST",
         body: JSON.stringify({ username, password }),

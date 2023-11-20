@@ -16,7 +16,7 @@ export default function PostPage() {
   const [redirect, setRedirect] = useState(false);
   const { id } = useParams();
   useEffect(() => {
-    fetch(`https://mern-crud-blog-app.onrender.com/post/${id}`).then(
+    fetch(`https://react-blog-test-5r9p.onrender.com/post/${id}`).then(
       (response) => {
         response.json().then((postInfo) => {
           setPostInfo(postInfo);
@@ -29,7 +29,7 @@ export default function PostPage() {
   console.log("outputid", id);
   async function deletePost() {
     const response = await fetch(
-      "https://mern-crud-blog-app.onrender.com/post/" + id,
+      "https://react-blog-test-5r9p.onrender.com/post/" + id,
       {
         method: "DELETE",
         credentials: "include",
@@ -148,7 +148,7 @@ export default function PostPage() {
               >
                 <img
                   className="postImagePhoto"
-                  src={`https://mern-crud-blog-app.onrender.com/${postInfo.cover}`}
+                  src={`https://react-blog-test-5r9p.onrender.com/${postInfo.cover}`}
                   alt=""
                 />
               </div>
