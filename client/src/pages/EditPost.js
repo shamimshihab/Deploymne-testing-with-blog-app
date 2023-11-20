@@ -101,8 +101,18 @@ export default function EditPost() {
           >
             <Input type="file" onChange={(ev) => setFiles(ev.target.files)} />
           </FormControl>
-          <Editor onChange={setContent} value={content} />
-          style={{ textTransform: "none", marginTop: 10 }}
+          <Editor
+            onChange={setContent}
+            value={content}
+            style={{ textTransform: "none", marginTop: 10 }}
+          />
+          <Button
+            variant="outlined"
+            type="submit"
+            style={{ textTransform: "none", marginTop: 10 }}
+          >
+            Edit post
+          </Button>
         </form>
       </Box>
     </Paper>
