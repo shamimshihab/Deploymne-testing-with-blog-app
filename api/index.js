@@ -23,7 +23,17 @@ mongoose.set("strictQuery", false);
 const uploadPath = path.join(__dirname, "uploads/");
 app.use("/uploads", express.static(uploadPath));
 // Configure multer to use the absolute upload path
-const uploadMiddleware = multer({ dest: uploadPath });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + Date.now() + ext);
+  },
+});
+
+const uploadMiddleware = multer({ storage: storage });
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 // app.use(
@@ -225,54 +235,70 @@ app.post("/logout", (req, res) => {
 // });
 
 app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
-  const { originalname, path } = req.file;
-  const ext = path.extname(originalname);
-  const newPath = `${path}.${ext}`;
+  try {
+    const {
+      file,
+      body: { title, summary, content },
+    } = req;
+    const newPath = file.path;
 
-  fs.renameSync(path, newPath);
+    const { token } = req.cookies;
+    jwt.verify(token, secret, {}, async (err, info) => {
+      if (err) throw err;
 
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const { title, summary, content } = req.body;
-    const postDoc = await Post.create({
-      title,
-      summary,
-      content,
-      cover: newPath,
-      author: info.id,
+      const postDoc = await Post.create({
+        title,
+        summary,
+        content,
+        cover: newPath,
+        author: info.id,
+      });
+
+      res.json(postDoc);
     });
-    res.json(postDoc);
-  });
+  } catch (error) {
+    console.error("Error while uploading the file:", error);
+    res.status(500).json({ error: "Failed to upload the file" });
+  }
 });
 
 app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
-  let newPath = null;
-  if (req.file) {
-    const { originalname, path } = req.file;
-    const ext = path.extname(originalname);
-    newPath = `${path}.${ext}`;
-    fs.renameSync(path, newPath);
-  }
+  try {
+    const {
+      file,
+      body: { id, title, summary, content },
+    } = req;
+    let newPath = null;
 
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const { id, title, summary, content } = req.body;
-    const postDoc = await Post.findById(id);
-    const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
-    if (!isAuthor) {
-      return res.status(400).json("you are not the author");
+    if (file) {
+      newPath = file.path;
     }
-    await postDoc.update({
-      title,
-      summary,
-      content,
-      cover: newPath ? newPath : postDoc.cover,
-    });
 
-    res.json(postDoc);
-  });
+    const { token } = req.cookies;
+    jwt.verify(token, secret, {}, async (err, info) => {
+      if (err) throw err;
+
+      const postDoc = await Post.findById(id);
+      const isAuthor =
+        JSON.stringify(postDoc.author) === JSON.stringify(info.id);
+
+      if (!isAuthor) {
+        return res.status(400).json("you are not the author");
+      }
+
+      await postDoc.updateOne({
+        title,
+        summary,
+        content,
+        cover: newPath || postDoc.cover,
+      });
+
+      res.json(postDoc);
+    });
+  } catch (error) {
+    console.error("Error while updating the file:", error);
+    res.status(500).json({ error: "Failed to update the file" });
+  }
 });
 
 app.delete("/post/:id", async (req, res) => {

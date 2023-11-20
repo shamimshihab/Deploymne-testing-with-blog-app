@@ -47,6 +47,9 @@ export default function CreatePost() {
         credentials: "include",
       }
     );
+
+    console.log("response", response);
+
     if (response.ok) {
       setRedirect(true);
     }
