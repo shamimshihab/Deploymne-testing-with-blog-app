@@ -218,6 +218,7 @@ app.get("/post", async (req, res) => {
 //     res.status(500).json({ error: "Internal server error" });
 //   }
 // });
+
 app.get("/aboutMe", async (req, res) => {
   try {
     const aboutMe = await AboutMe.findOne();
@@ -227,7 +228,7 @@ app.get("/aboutMe", async (req, res) => {
       res.status(404).json({ error: "AboutMe information not found" });
     }
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching AboutMe:", err);
     res.status(500).json({ error: "Failed to retrieve AboutMe information" });
   }
 });
