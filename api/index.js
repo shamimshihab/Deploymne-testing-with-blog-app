@@ -9,7 +9,7 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
-
+const path = require("path");
 const fs = require("fs");
 
 const salt = bcrypt.genSaltSync(10);
