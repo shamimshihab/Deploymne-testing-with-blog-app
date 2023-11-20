@@ -34,6 +34,10 @@ mongoose.connect(
   "mongodb+srv://shamimshihab56:shihabblog56@cluster0.pgwf0fs.mongodb.net/?retryWrites=true&w=majority"
 );
 
+app.get("/", (req, res) => {
+  res.send("Hello from the server!");
+});
+
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
