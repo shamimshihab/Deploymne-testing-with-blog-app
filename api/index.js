@@ -9,31 +9,12 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
-const path = require("path");
+const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
 
 const salt = bcrypt.genSaltSync(10);
 const secret = "asdfe45we45w345wegw345werjktjwertkj";
 mongoose.set("strictQuery", false);
-
-// image file rendering prob testing
-// const uploadMiddleware = multer({ dest: "uploads/" });
-
-// Define an absolute path for uploads
-const uploadPath = path.join(__dirname, "uploads/");
-app.use("/uploads", express.static(uploadPath));
-// Configure multer to use the absolute upload path
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + "-" + Date.now() + ext);
-  },
-});
-
-const uploadMiddleware = multer({ storage: storage });
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 // app.use(
