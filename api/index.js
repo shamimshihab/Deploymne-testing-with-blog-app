@@ -11,62 +11,18 @@ const cookieParser = require("cookie-parser");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
-
 const salt = bcrypt.genSaltSync(10);
 const secret = "asdfe45we45w345wegw345werjktjwertkj";
-mongoose.set("strictQuery", false);
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
-// app.use(
-//   cors({
-//     credentials: true,
-//     origin: [
-//       "http://localhost:3000",
-//       "https://react-blog-test-5r9p.onrender.com",
-//     ],
-//   })
-// );
-
-// app.use(
-//   cors({
-//     credentials: true,
-//     origin: "*",
-//   })
-// );
-
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static(__dirname + "/uploads"));
 
-// mongoose.connect(
-//   "mongodb+srv://shamimshihab56:shihabblog56@cluster0.pgwf0fs.mongodb.net/?retryWrites=true&w=majority"
-// );
+mongoose.connect(
+  "mongodb+srv://shamimshihab56:shihabblog56@cluster0.pgwf0fs.mongodb.net/?retryWrites=true&w=majority"
+);
 
-mongoose
-  .connect(
-    "mongodb+srv://shamimshihab56:shihabblog56@cluster0.pgwf0fs.mongodb.net/?retryWrites=true&w=majority",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
-  .then(() => {
-    console.log("Connected to MongoDB Atlas");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB Atlas:", error);
-  });
-
-app.get("/", (req, res) => {
-  res.send("Hello from the server!");
-});
-app.get("/check", (req, res) => {
-  res.send("check is working");
-});
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Promise Rejection:", err);
-  // You can handle or log the error here
-});
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -75,9 +31,9 @@ app.post("/register", async (req, res) => {
       password: bcrypt.hashSync(password, salt),
     });
     res.json(userDoc);
-  } catch (error) {
-    console.error("Error in user registration:", error);
-    res.status(500).json({ error: "Could not register user" });
+  } catch (e) {
+    console.log(e);
+    res.status(400).json(e);
   }
 });
 
@@ -109,80 +65,7 @@ app.get("/profile", (req, res) => {
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json("ok");
 });
-app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
-  try {
-    const { originalname, path } = req.file;
-    const parts = originalname.split(".");
-    const ext = parts[parts.length - 1];
-    const newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
 
-    const { token } = req.cookies;
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
-      const {
-        title,
-
-        // summary,
-
-        content,
-      } = req.body;
-      const postDoc = await Post.create({
-        title,
-        // summary,
-        content,
-        cover: newPath,
-        author: info.id,
-      });
-      res.json(postDoc);
-    });
-  } catch (error) {
-    console.error("Error creating post:", error);
-    res.status(500).json({ error: "Could not create post" });
-  }
-});
-
-app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
-  let newPath = null;
-  if (req.file) {
-    const { originalname, path } = req.file;
-    const parts = originalname.split(".");
-    const ext = parts[parts.length - 1];
-    newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
-  }
-
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const {
-      id,
-      title,
-
-      // summary,
-
-      content,
-    } = req.body;
-    const postDoc = await Post.findById(id);
-    const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
-    if (!isAuthor) {
-      return res.status(400).json("you are not the author");
-    }
-    await postDoc.update({
-      title,
-      // summary,
-      content,
-      cover: newPath ? newPath : postDoc.cover,
-    });
-
-    res.json(postDoc);
-  });
-});
-
-app.use((err, req, res, next) => {
-  console.error("Unhandled Error:", err);
-  res.status(500).json({ error: "Internal Server Error" });
-});
 // app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
 //   let cover = "";
 
@@ -239,59 +122,63 @@ app.use((err, req, res, next) => {
 //   });
 // });
 
-// app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
-//   const { originalname, path } = req.file;
-//   const parts = originalname.split(".");
-//   const ext = parts[parts.length - 1];
-//   const newPath = path + "." + ext;
-//   fs.renameSync(path, newPath);
+app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
+  const { originalname, path } = req.file;
+  const parts = originalname.split(".");
+  const ext = parts[parts.length - 1];
+  const newPath = path + "." + ext;
+  fs.renameSync(path, newPath);
 
-//   const { token } = req.cookies;
-//   jwt.verify(token, secret, {}, async (err, info) => {
-//     if (err) throw err;
-//     const { title, summary, content } = req.body;
-//     const postDoc = await Post.create({
-//       title,
-//       summary,
-//       content,
-//       cover: newPath,
-//       author: info.id,
-//     });
-//     res.json(postDoc);
-//   });
-// });
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const {
+      title,
 
-// app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
-//   let newPath = null;
-//   if (req.file) {
-//     const { originalname, path } = req.file;
-//     const parts = originalname.split(".");
-//     const ext = parts[parts.length - 1];
-//     newPath = path + "." + ext;
-//     fs.renameSync(path, newPath);
-//   }
+      // summary,
 
-//   const { token } = req.cookies;
-//   jwt.verify(token, secret, {}, async (err, info) => {
-//     if (err) throw err;
-//     const { id, title, summary, content } = req.body;
-//     const postDoc = await Post.findById(id);
-//     const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
-//     if (!isAuthor) {
-//       return res.status(400).json("you are not the author");
-//     }
-//     await postDoc.update({
-//       title,
-//       summary,
-//       content,
-//       cover: newPath ? newPath : postDoc.cover,
-//     });
+      content,
+    } = req.body;
+    const postDoc = await Post.create({
+      title,
+      // summary,
+      content,
+      cover: newPath,
+      author: info.id,
+    });
+    res.json(postDoc);
+  });
+});
 
-//     res.json(postDoc);
-//   });
-// });
+app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
+  let newPath = null;
+  if (req.file) {
+    const { originalname, path } = req.file;
+    const parts = originalname.split(".");
+    const ext = parts[parts.length - 1];
+    newPath = path + "." + ext;
+    fs.renameSync(path, newPath);
+  }
 
-//
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const { id, title, summary, content } = req.body;
+    const postDoc = await Post.findById(id);
+    const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
+    }
+    await postDoc.update({
+      title,
+      // summary,
+      content,
+      cover: newPath ? newPath : postDoc.cover,
+    });
+
+    res.json(postDoc);
+  });
+});
 
 app.delete("/post/:id", async (req, res) => {
   const postId = req.params.id;
@@ -314,30 +201,16 @@ app.get("/post", async (req, res) => {
   );
 });
 
-// app.get("/aboutMe", async (req, res) => {
-//   try {
-//     const aboutMe = await AboutMe.findOne();
-//     if (aboutMe) {
-//       res.json({ description: aboutMe.description });
-//     } else {
-//       res.status(404).json({ error: "AboutMe information not found" });
-//     }
-//   } catch (err) {
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
-
 app.get("/aboutMe", async (req, res) => {
   try {
-    const aboutMe = await AboutMe.findOne().maxTimeMS(30000);
+    const aboutMe = await AboutMe.findOne();
     if (aboutMe) {
       res.json({ description: aboutMe.description });
     } else {
       res.status(404).json({ error: "AboutMe information not found" });
     }
   } catch (err) {
-    console.error("Error fetching AboutMe:", err);
-    res.status(500).json({ error: "Failed to retrieve AboutMe information" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -347,7 +220,6 @@ app.get("/post/:id", async (req, res) => {
   res.json(postDoc);
 });
 
-// app.listen(4000);
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
