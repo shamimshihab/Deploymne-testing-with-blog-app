@@ -234,71 +234,57 @@ app.post("/logout", (req, res) => {
 //   });
 // });
 
+//
 app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
-  try {
-    const {
-      file,
-      body: { title, summary, content },
-    } = req;
-    const newPath = file.path;
+  const { originalname, path } = req.file;
+  const parts = originalname.split(".");
+  const ext = parts[parts.length - 1];
+  const newPath = path + "." + ext;
+  fs.renameSync(path, newPath);
 
-    const { token } = req.cookies;
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
-
-      const postDoc = await Post.create({
-        title,
-        summary,
-        content,
-        cover: newPath.replace("\\", "/"), // Adjust the path format for Windows
-        author: info.id,
-      });
-
-      res.json(postDoc);
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const { title, summary, content } = req.body;
+    const postDoc = await Post.create({
+      title,
+      summary,
+      content,
+      cover: newPath,
+      author: info.id,
     });
-  } catch (error) {
-    console.error("Error while uploading the file:", error);
-    res.status(500).json({ error: "Failed to upload the file" });
-  }
+    res.json(postDoc);
+  });
 });
 
 app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
-  try {
-    const {
-      file,
-      body: { id, title, summary, content },
-    } = req;
-    let newPath = null;
-
-    if (file) {
-      newPath = file.path.replace("\\", "/"); // Adjust the path format for Window
-    }
-
-    const { token } = req.cookies;
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
-
-      const postDoc = await Post.findById(id);
-      const isAuthor =
-        JSON.stringify(postDoc.author) === JSON.stringify(info.id);
-
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
-
-      await postDoc.updateOne({
-        title,
-        summary,
-        content,
-        cover: newPath || postDoc.cover,
-      });
-
-      res.json(postDoc);
-    });
-  } catch (error) {
-    console.error("Error while updating the file:", error);
-    res.status(500).json({ error: "Failed to update the file" });
+  let newPath = null;
+  if (req.file) {
+    const { originalname, path } = req.file;
+    const parts = originalname.split(".");
+    const ext = parts[parts.length - 1];
+    newPath = path + "." + ext;
+    fs.renameSync(path, newPath);
   }
+
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const { id, title, summary, content } = req.body;
+    const postDoc = await Post.findById(id);
+    const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
+    }
+    await postDoc.update({
+      title,
+      summary,
+      content,
+      cover: newPath ? newPath : postDoc.cover,
+    });
+
+    res.json(postDoc);
+  });
 });
 
 app.delete("/post/:id", async (req, res) => {
