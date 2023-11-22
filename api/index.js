@@ -139,10 +139,16 @@ app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
     const { token } = req.cookies;
     jwt.verify(token, secret, {}, async (err, info) => {
       if (err) throw err;
-      const { title, summary, content } = req.body;
+      const {
+        title,
+
+        // summary,
+
+        content,
+      } = req.body;
       const postDoc = await Post.create({
         title,
-        summary,
+        // summary,
         content,
         cover: newPath,
         author: info.id,
@@ -168,7 +174,14 @@ app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
-    const { id, title, summary, content } = req.body;
+    const {
+      id,
+      title,
+
+      // summary,
+
+      content,
+    } = req.body;
     const postDoc = await Post.findById(id);
     const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
     if (!isAuthor) {
@@ -176,7 +189,7 @@ app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
     }
     await postDoc.update({
       title,
-      summary,
+      // summary,
       content,
       cover: newPath ? newPath : postDoc.cover,
     });
