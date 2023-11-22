@@ -122,32 +122,66 @@ app.post("/logout", (req, res) => {
 //   });
 // });
 
+// app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
+//   const { originalname, path } = req.file;
+//   const parts = originalname.split(".");
+//   const ext = parts[parts.length - 1];
+//   const newPath = path + "." + ext;
+//   fs.renameSync(path, newPath);
+
+//   const { token } = req.cookies;
+//   jwt.verify(token, secret, {}, async (err, info) => {
+//     if (err) throw err;
+//     const {
+//       title,
+
+//       // summary,
+
+//       content,
+//     } = req.body;
+//     const postDoc = await Post.create({
+//       title,
+//       // summary,
+//       content,
+//       cover: newPath,
+//       author: info.id,
+//     });
+//     res.json(postDoc);
+//   });
+// });
+
 app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
-  const { originalname, path } = req.file;
-  const parts = originalname.split(".");
-  const ext = parts[parts.length - 1];
-  const newPath = path + "." + ext;
-  fs.renameSync(path, newPath);
+  try {
+    const { token } = req.cookies;
+    if (!token) {
+      return res.status(401).json({ error: "Token not provided" });
+    }
 
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const {
-      title,
+    jwt.verify(token, secret, {}, async (err, info) => {
+      if (err) {
+        console.error("JWT verification error:", err);
+        return res.status(401).json({ error: "Unauthorized" });
+      }
 
-      // summary,
+      const { originalname, path } = req.file;
+      const parts = originalname.split(".");
+      const ext = parts[parts.length - 1];
+      const newPath = path + "." + ext;
+      fs.renameSync(path, newPath);
 
-      content,
-    } = req.body;
-    const postDoc = await Post.create({
-      title,
-      // summary,
-      content,
-      cover: newPath,
-      author: info.id,
+      const { title, content } = req.body;
+      const postDoc = await Post.create({
+        title,
+        content,
+        cover: newPath,
+        author: info.id,
+      });
+      res.json(postDoc);
     });
-    res.json(postDoc);
-  });
+  } catch (error) {
+    console.error("Error in /post route:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
