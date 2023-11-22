@@ -271,7 +271,7 @@ app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
     let newPath = null;
 
     if (file) {
-      newPath = file.path.replace("\\", "/"); // Adjust the path format for Windows
+      newPath = file.path.replace("\\", "/"); // Adjust the path format for Window
     }
 
     const { token } = req.cookies;
