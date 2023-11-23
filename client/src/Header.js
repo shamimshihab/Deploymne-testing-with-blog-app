@@ -42,7 +42,7 @@ export default function Header({ toggleTheme }) {
         style={{
           backgroundColor:
             theme.palette.mode === "dark" ? "#05A6F1 " : "#C5E8F8",
-          height: "7vh",
+          // height: "7vh",
           margin: "0rem 0rem",
           padding: "1rem 0rem 1rem",
           position: "sticky",
