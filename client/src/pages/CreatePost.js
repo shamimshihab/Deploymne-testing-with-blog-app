@@ -26,46 +26,17 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 export default function CreatePost() {
   const [title, setTitle] = useState("");
-  // const [summary, setSummary] = useState("");
+
   const [content, setContent] = useState("");
   const [files, setFiles] = useState("");
   const [redirect, setRedirect] = useState(false);
 
-  // async function createNewPost(ev) {
-  //   console.log("enter");
-  //   const data = new FormData();
-  //   data.set("title", title);
-  //   // data.set("summary", summary);
-  //   data.set("content", content);
-  //   data.set("file", files[0]);
-  //   ev.preventDefault();
-  //   const response = await fetch(
-  //     "https://react-blog-test-5r9p.onrender.com/post",
-  //     {
-  //       method: "POST",
-  //       body: data,
-  //       credentials: "include",
-  //     }
-  //   );
-
-  //   console.log("response", response);
-
-  //   if (response.ok) {
-  //     setRedirect(true);
-  //   }
-  // }
-
-  // if (redirect) {
-  //   return <Navigate to={"/"} />;
-  // }
-
   async function createNewPost(ev) {
     ev.preventDefault();
-    console.log("enter");
 
     const data = new FormData();
     data.set("title", title);
-    // data.set("summary", summary);
+
     data.set("content", content);
     data.set("file", files[0]);
 
