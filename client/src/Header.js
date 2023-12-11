@@ -31,7 +31,7 @@ export default function Header({ toggleTheme }) {
       credentials: "include",
       method: "POST",
     });
-    setUserInfo(null);
+    setUserInfo("");
   }
 
   const username = userInfo?.username;
