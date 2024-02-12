@@ -3,6 +3,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const User = require("./models/User");
 const Post = require("./models/Post");
+const Review = require("./models/Review");
 const AboutMe = require("./models/AboutMe");
 const bcrypt = require("bcryptjs");
 const app = express();
@@ -140,12 +141,35 @@ app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
   });
 });
 
-app.delete("/post/:id", async (req, res) => {
-  const postId = req.params.id;
+// app.delete("/post/:id", async (req, res) => {
+//   const postId = req.params.id;
 
+//   try {
+//     await Post.findByIdAndDelete(postId);
+//     res.json({ message: "Post deleted successfully" });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ error: "An error occurred while deleting the post" });
+//   }
+// });
+
+app.delete("/post/:id", uploadMiddleware.single("file"), async (req, res) => {
+  const { token } = req.cookies;
   try {
-    await Post.findByIdAndDelete(postId);
-    res.json({ message: "Post deleted successfully" });
+    jwt.verify(token, secret, {}, async (err, info) => {
+      const { id } = req.params;
+      if (err) throw err;
+      const postDoc = await Post.findById(id);
+      const isAuthor =
+        postDoc && postDoc.author && postDoc.author.equals(info.id);
+      if (!isAuthor) {
+        return res.status(400).json("You are not the author");
+      }
+
+      await Post.findByIdAndDelete(id);
+      res.json({ message: "Post deleted successfully" });
+    });
   } catch (error) {
     res
       .status(500)
@@ -174,10 +198,107 @@ app.get("/aboutMe", async (req, res) => {
   }
 });
 
+// app.get("/post/:id", async (req, res) => {
+//   const { id } = req.params;
+//   const postDoc = await Post.findById(id).populate("author", ["username"]);
+//   res.json(postDoc);
+// });
+
 app.get("/post/:id", async (req, res) => {
   const { id } = req.params;
-  const postDoc = await Post.findById(id).populate("author", ["username"]);
+  const postDoc = await Post.findById(id)
+    .populate({
+      path: "author",
+      select: ["username"],
+    })
+    .populate({
+      path: "review",
+      options: { sort: { createdAt: -1 } },
+    });
+
   res.json(postDoc);
+});
+
+app.get("/post/:id", async (req, res) => {
+  const { id } = req.params;
+  const postDoc = await Post.findById(id)
+    .populate({
+      path: "author",
+      select: ["username"],
+    })
+    .populate({
+      path: "review",
+      options: { sort: { createdAt: -1 } },
+    });
+
+  res.json(postDoc);
+});
+
+app.post(
+  "/post/:id/review/addNew",
+  uploadMiddleware.single("file"),
+  async (req, res) => {
+    try {
+      const { token } = req.cookies;
+
+      console.log(" req.cookies", req.cookies);
+
+      const { id } = req.params;
+      const comment = req.body.comment;
+
+      console.log("token", token);
+
+      jwt.verify(token, secret, {}, async (err, info) => {
+        console.log("infoID", info);
+        const findPost = await Post.findById(id).exec();
+        const reviewDoc = await Review.create({
+          comment,
+          author: info.username,
+          authorID: info.id,
+        });
+
+        findPost.review.push(reviewDoc);
+        const pushReviewToPost = await findPost.save();
+
+        res.json(reviewDoc);
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: "An error occurred while deleting the post" });
+    }
+  }
+);
+
+app.delete("/post/:postId/review/:reviewId", async (req, res) => {
+  try {
+    const { postId, reviewId } = req.params;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    const review = await Review.findById(reviewId);
+
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    post.review.pull(reviewId);
+
+    await post.save();
+
+    await Review.findByIdAndDelete(reviewId);
+
+    res.json({ message: "Review deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while deleting the review" });
+  }
 });
 
 const PORT = process.env.PORT || 4000;

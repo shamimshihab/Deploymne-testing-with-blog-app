@@ -1,9 +1,18 @@
 import { useContext, useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { formatISO9075 } from "date-fns";
 import { UserContext } from "../UserContext";
 import { Link } from "react-router-dom";
-import { Typography, Box, Paper, Button, Grid, Stack } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import {
+  Typography,
+  Box,
+  Paper,
+  Button,
+  Grid,
+  Stack,
+  TextField,
+} from "@mui/material";
 
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
@@ -11,10 +20,13 @@ import Divider from "@mui/material/Divider";
 
 import SimilarPost from "../SimilarPost";
 export default function PostPage() {
+  const navigate = useNavigate();
+  const [comment, setComment] = useState("");
   const [postInfo, setPostInfo] = useState(null);
   const { userInfo } = useContext(UserContext);
   const [redirect, setRedirect] = useState(false);
   const { id } = useParams();
+  const [reloadData, setReloadData] = useState(false);
   useEffect(() => {
     fetch(`https://react-blog-test-5r9p.onrender.com/post/${id}`).then(
       (response) => {
@@ -23,7 +35,7 @@ export default function PostPage() {
         });
       }
     );
-  }, [id]);
+  }, [id, reloadData]);
 
   if (!postInfo) return "";
   console.log("outputid", id);
@@ -49,47 +61,76 @@ export default function PostPage() {
     return doc.body.textContent || "";
   }
   const sanitizedContent = sanitizeHTML(postInfo.content);
+
+  const reviewDelete = async (ev, reviewId) => {
+    ev.preventDefault();
+
+    const response = await fetch(
+      `https://react-blog-test-5r9p.onrender.com/post/${id}/review/${reviewId}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+
+    if (response.ok) {
+      // window.location.reload();
+      setReloadData(true);
+      navigate(`/post/${id}`);
+    }
+    console.log("review deleted");
+  };
+
+  const handleSave = async (ev) => {
+    ev.preventDefault();
+
+    if (comment.trim() !== "") {
+      // Perform save operation
+
+      const response = await fetch(
+        `https://react-blog-test-5r9p.onrender.com/post/${id}/review/addNew`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ comment }),
+          credentials: "include",
+        }
+      );
+
+      if (response.ok) {
+        // Wait for the new comment to be added, then fetch the updated post information
+        await fetch(
+          `https://react-blog-test-5r9p.onrender.com/post/${id}`
+        ).then((response) => {
+          if (response.ok) {
+            response.json().then((postInfo) => {
+              setPostInfo(postInfo);
+            });
+          }
+        });
+        setComment("");
+        navigate(`/post/${id}`);
+      }
+    }
+  };
+  const handleCommentChange = (event) => {
+    setComment(event.target.value);
+  };
+  function formatDate(dateString) {
+    const options = {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    };
+    return new Date(dateString).toLocaleString("en-US", options);
+  }
   return (
     <>
-      {/* <div className="post-page">
-        <h1>{postInfo.title}</h1>
-        <time>{formatISO9075(new Date(postInfo.createdAt))}</time>
-        <div className="author">by @{postInfo.author.username}</div>
-        {userInfo.id === postInfo.author._id && (
-          <div className="edit-row">
-            <Link className="edit-btn" to={`/edit/${postInfo._id}`}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-                />
-              </svg>
-              Edit this post
-            </Link>
-          </div>
-        )}
-
-        {userInfo.id === postInfo.author._id && (
-          <div className="edit-row">
-            <Button onClick={deletePost}>Delete this post</Button>
-          </div>
-        )}
-        <div className="image">
-          <img src={`http://localhost:4000/${postInfo.cover}`} alt="" />
-        </div>
-        <div
-          className="content"
-          dangerouslySetInnerHTML={{ __html: postInfo.content }}
-        />
-      </div> */}
       <Paper
         className="home-page-container"
         elevation={3}
@@ -106,7 +147,7 @@ export default function PostPage() {
                 }}
               >
                 <h1>{postInfo.title}</h1>
-              </Typography>{" "}
+              </Typography>
               <time>{formatISO9075(new Date(postInfo.createdAt))}</time>
               <div className="author">by @{postInfo.author.username}</div>
               {userInfo.id === postInfo.author._id && (
@@ -156,7 +197,6 @@ export default function PostPage() {
                 style={{
                   display: "flex",
                   justifyContent: "center",
-
                   margin: 8,
                   padding: 3,
                 }}
@@ -169,8 +209,95 @@ export default function PostPage() {
                   }}
                 >
                   {sanitizedContent}
-                </Typography>{" "}
+                </Typography>
               </div>
+              {userInfo.id && (
+                <div style={{ margin: 8, padding: 3 }}>
+                  <form>
+                    <TextField
+                      required
+                      label="Write your comment"
+                      variant="outlined"
+                      fullWidth
+                      multiline
+                      rows={3}
+                      value={comment}
+                      onChange={handleCommentChange}
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleSave}
+                      style={{ marginTop: "1rem" }}
+                    >
+                      Save
+                    </Button>
+                  </form>
+                </div>
+              )}
+            </div>
+            <div style={{ margin: 8, padding: 3 }}>
+              <Box style={{ marginTop: "1.5rem" }}>
+                {postInfo.review?.map((review) => (
+                  <Stack
+                    key={review._id}
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
+                    marginBottom={2}
+                    padding={2}
+                    border={1}
+                    borderColor="grey.300"
+                  >
+                    <Stack direction="column" style={{ width: "10%" }}>
+                      <Avatar />
+                    </Stack>
+                    <Stack
+                      style={{
+                        width: "90%",
+                        display: "flex",
+                        flexDirection: "column",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Typography
+                        style={{
+                          marginBottom: "0.3rem",
+                          whiteSpace: "normal",
+                          overflowWrap: "break-word",
+                        }}
+                      >
+                        {review.author}
+                      </Typography>
+                      <Typography
+                        style={{
+                          marginBottom: "0.2rem",
+                          whiteSpace: "normal",
+                          overflowWrap: "break-word",
+                        }}
+                      >
+                        {review.comment}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        style={{ marginBottom: "0.2rem" }}
+                      >
+                        {formatDate(review.createdAt)}
+                      </Typography>
+                      {userInfo.id === review.authorID && (
+                        <button
+                          style={{ maxWidth: "15%" }}
+                          onClick={(ev) => {
+                            reviewDelete(ev, review._id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </Stack>
+                  </Stack>
+                ))}
+              </Box>
             </div>
           </Grid>
           <Grid item sm={12} xs={12} md={4} style={{ padding: 8 }}>
